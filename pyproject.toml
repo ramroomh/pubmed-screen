@@ -8,6 +8,22 @@ version = "1.0.0"
 authors = [
     { name = "Rami Hamati", email = "rhamati95@gmail.com" }
 ]
+description = "Automates the initial screening phase of systematic PubMed search using keywords."
+readme = "README.md"
+license = {file = "LICENSE"}
+
+keywords = ["PubMed", "citations"]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+]
+
+requires-python = ">=3.8"
+
 dependencies = [
     "pandas >= 1.5.0, < 2",
     "requests >= 2.28.0, < 3",
