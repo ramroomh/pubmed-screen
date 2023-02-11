@@ -31,5 +31,8 @@ dependencies = [
     "seaborn>=0.12.0",
 ]
 
+[project.optional-dependencies]
+dev = ["black"]
+
 [project.scripts]
 pmscreen = "pubmed_screen.main:main"

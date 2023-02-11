@@ -13,10 +13,10 @@ $ python3 -m venv venv
 $ source venv/bin/activate
 ```
 
-2) Install an editable version of the package with `pip`.
+2) Install an editable development version of the package with `pip`.
 
 ```
-$ pip3 install --editable .
+$ pip3 install --editable .[dev]
 ```
 
 3) Edit the `src/pubmed_screen/main.py` file to make changes.
