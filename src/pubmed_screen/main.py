@@ -1,4 +1,12 @@
-#!/usr/bin/env python
+import math
+import os
+from urllib.parse import quote
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import requests
+import seaborn as sns
+from bs4 import BeautifulSoup as bs
 
 
 def main_menu():
@@ -25,12 +33,6 @@ def main_menu():
 def generate_links():
     """This script automates the initial screening phase of systematic search using keywords and does NOT account for duplicates.
     Compatible with the PubMed Database only."""
-    # Import libraries
-    import os, sys
-    import pandas as pd
-    import requests
-    from bs4 import BeautifulSoup as bs
-    from urllib.parse import urlparse, quote
 
     # Define keywords
     print("This version of Qwik Search supports two (2) sets of keywords.\n")
@@ -113,13 +115,6 @@ def generate_links():
 
 def get_citations(save_path):
     """Extracts article IDs from URLs."""
-    # Import libraries
-    import os, sys
-    import pandas as pd
-    import requests
-    import math
-    from bs4 import BeautifulSoup as bs
-    from urllib.parse import urlparse, quote
 
     # Get URLs
     file_name = os.path.join(save_path + "_search_summary.csv")
@@ -162,9 +157,6 @@ def get_citations(save_path):
 
 def count_duplicates(save_path, df, notebook):
     """Counts number of duplicate articles."""
-    # Import libraries
-    import os, sys
-    import pandas as pd
 
     # Initialize count
     master_counter = {}
@@ -198,11 +190,6 @@ def count_duplicates(save_path, df, notebook):
 
 def plot_search(save_path, df, df2):
     """Plots number of duplicate and non-duplicate articles as a function of the # of searches."""
-    # Import libraries
-    import os, sys
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import seaborn as sns
 
     # Set style
     sns.set_style("dark")
@@ -222,9 +209,6 @@ def plot_search(save_path, df, df2):
 
 def percent_overlap():
     """Takes _search_summary.csv files generated from search and calculates % of overlap between search strategies."""
-    # Import libraries
-    import os, sys
-    import pandas as pd
 
     # User input for file names
     print(
