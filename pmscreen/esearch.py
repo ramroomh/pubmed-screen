@@ -26,8 +26,8 @@ class PubMed:
 
     def query(self, term, max_results=200):
         """Returns a SearchResult object for the given search term."""
-        if max_results > 10000:
-            raise ValueError("max_results cannot be larger than 10000")
+        if max_results > 9999:
+            raise ValueError("max_results cannot be larger than 9999")
 
         # Enforce minimum intervals between calls
         self.limiter.wait()

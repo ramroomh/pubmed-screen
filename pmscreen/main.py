@@ -85,7 +85,7 @@ def screen_keywords():
             terms = (keyword1, "AND", keyword2)
             print("Searching for: ", terms)
             # Get search result for terms
-            search_result = pub_med.query(query_term, max_results=10000)
+            search_result = pub_med.query(query_term, max_results=9999)
             print(search_result.url)
             citation_count = search_result.count
             summary_results.append([URL, terms, citation_count])
