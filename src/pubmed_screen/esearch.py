@@ -21,8 +21,6 @@ class PubMed:
         else:
             # 3 requests per second without an API key
             self.limiter = RateLimiter(3)
-        self.last_url = None
-        self.last_search_result = None
 
     def query(self, term, max_results=200):
         """Returns a SearchResult object for the given search term."""
@@ -44,8 +42,6 @@ class PubMed:
             params["api_key"] = self.api_key
         response = requests.get(url, params)
         response.raise_for_status()
-        self.last_url = response.url
-        self.last_search_result = response.json()["esearchresult"]
         return SearchResult(response)
 
 
