@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from urllib.parse import quote
 
 import matplotlib.pyplot as plt
@@ -98,13 +98,13 @@ def screen_keywords():
     # Transfer list of lists to tabular form
     df = pd.DataFrame(summary_results, columns=["URL", "Terms", "Number of Titles"])
     df.insert(loc=3, column="Cum Sum", value=df["Number of Titles"].cumsum())
-    file_name = os.path.join(save_path + "_search_summary.csv")
+    file_name = Path(save_path + "_search_summary.csv")
     df.to_csv(file_name)
 
     # Append data to _citation_IDs.csv
     df_notebook = pd.DataFrame(notebook)
     df_notebook = df_notebook.transpose()
-    notebook_name = os.path.join(save_path + "_citation_IDs.csv")
+    notebook_name = Path(save_path + "_citation_IDs.csv")
     df_notebook.to_csv(notebook_name)
 
     return save_path, df, notebook
@@ -138,7 +138,7 @@ def count_duplicates(save_path, df, notebook):
         loc=2, column="Cum Non-Dup", value=df2["Number of Non-Duplicates"].cumsum()
     )
     final = pd.concat([df, df2], axis=1)
-    final_name = os.path.join(save_path + "_search_summary.csv")
+    final_name = Path(save_path + "_search_summary.csv")
     final.to_csv(final_name)
     return save_path, df, df2
 
@@ -156,7 +156,7 @@ def plot_search(save_path, df, df2):
     plt.ylabel("# of Titles")
     plt.legend(title="Articles", loc="upper left", labels=["Non-Duplicates", "All"])
     # Save data
-    alldata.savefig(os.path.join(save_path + ".jpg"), dpi=300)
+    alldata.savefig(Path(save_path + ".jpg"), dpi=300)
     print("Data has been saved as", save_path)
     print("Thank you for using PubMed Screen. Goodbye!")
     exit()
@@ -170,16 +170,16 @@ def percent_overlap():
         "Please enter the file path separated by '/' for each search that was generated."
     )
     print("For example: /home/name/Downloads/filename.csv")
-    search1_name = input("What is the file path for the first search?")
-    search2_name = input("What is the file path for the second search?")
+    search1_name = input("What is the file path for the first search? ")
+    search2_name = input("What is the file path for the second search? ")
     # Extract data
     search1 = []
-    df3 = pd.read_csv(search1_name, index_col=0)
+    df3 = pd.read_csv(Path(search1_name), index_col=0)
     for d in df3.columns:
         for PMID in df3[str(d)]:
             search1.append(PMID)
     search2 = []
-    df4 = pd.read_csv(search2_name, index_col=0)
+    df4 = pd.read_csv(Path(search2_name), index_col=0)
     for d in df4.columns:
         for PMID in df4[str(d)]:
             search2.append(PMID)
