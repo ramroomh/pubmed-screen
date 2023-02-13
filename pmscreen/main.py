@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 from urllib.parse import quote
 
@@ -8,7 +9,7 @@ import seaborn as sns
 from .esearch import PubMed
 
 
-def main_menu():
+def main_menu(api_key):
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("Welcome to PubMed Screen.")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -24,12 +25,12 @@ def main_menu():
         else:
             continue
     if option == "1":
-        option_1()
+        option_1(api_key)
     elif option == "2":
         option_2()
 
 
-def screen_keywords():
+def screen_keywords(api_key):
     """This script automates the initial screening phase of systematic search using keywords and does NOT account for duplicates.
     Compatible with the PubMed Database only."""
 
@@ -64,7 +65,7 @@ def screen_keywords():
         if term1 and term2 and save_path != None:
             break
     # Results represents the list of lists appropriate for transfer to tabular form
-    pub_med = PubMed()
+    pub_med = PubMed(api_key)
     summary_results = []
     notebook = []
     for keyword1 in term1:
@@ -198,8 +199,8 @@ def percent_overlap():
     print("Overall % overlap:", result3)
 
 
-def option_1():
-    save_path, df, notebook = screen_keywords()
+def option_1(api_key):
+    save_path, df, notebook = screen_keywords(api_key)
     save_path, df, df2 = count_duplicates(save_path, df, notebook)
     plot_search(save_path, df, df2)
 
@@ -209,7 +210,28 @@ def option_2():
 
 
 def main():
-    main_menu()
+    parser = argparse.ArgumentParser(
+        description="Automates the initial screening phase of systematic PubMed search using keywords"
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="store_true",
+        help="print version information and exit",
+    )
+    parser.add_argument(
+        "-k", "--api-key", help="API key for PubMed, increases request rate"
+    )
+    args = parser.parse_args()
+
+    if args.version:
+        import sys
+        from importlib.metadata import version
+
+        print(version("pubmed-screen"))
+        sys.exit(0)
+
+    main_menu(args.api_key)
 
 
 if __name__ == "__main__":
