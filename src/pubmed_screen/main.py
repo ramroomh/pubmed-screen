@@ -1,22 +1,21 @@
-import math
 import os
 from urllib.parse import quote
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import requests
 import seaborn as sns
-from bs4 import BeautifulSoup as bs
+
+from .esearch import PubMed
 
 
 def main_menu():
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("Welcome to Qwik Search 1.0.")
+    print("Welcome to PubMed Screen.")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("Qwik Search allows you to optimize your search strategy.")
+    print("PubMed Screen allows you to optimize your search strategy.")
     while True:
         option = input(
-            "Would you like to create a search (enter: 1) or compare searches (enter: 2)?"
+            "Would you like to create a search (enter: 1) or compare searches (enter: 2)? "
         )
         if option == "1":
             break
@@ -30,19 +29,21 @@ def main_menu():
         option_2()
 
 
-def generate_links():
+def screen_keywords():
     """This script automates the initial screening phase of systematic search using keywords and does NOT account for duplicates.
     Compatible with the PubMed Database only."""
 
     # Define keywords
-    print("This version of Qwik Search supports two (2) sets of keywords.\n")
+    print("This version of PubMed Screen supports two (2) sets of keywords.\n")
     print(
         "Please enter keywords WITHOUT spaces separated by a semicolon (;) (representing 'OR') for each SET of keywords."
     )
     print(
         "For example, entering 'Dopamine;Dopamine Agents' returns the terms: Dopamine OR Dopamine Agents.\n"
     )
-    print("Insert an aterisk (*) after a keyword to expand the search of that keyword.")
+    print(
+        "Insert an asterisk (*) after a keyword to expand the search of that keyword."
+    )
     print(
         "For example, entering 'Psych*' returns the terms: Psychology, Psychopharmacology.\n"
     )
@@ -51,107 +52,61 @@ def generate_links():
     )
     print("Insert an at sign (@) after a keyword to tag it as a MeSH term.\n")
     while True:
-        term1 = input("Please input keywords for the FIRST SET of terms.")
+        term1 = input("Please input keywords for the FIRST SET of terms: ")
         term1 = list(term1.split(";"))
-        term2 = term2 = input("Please input keywords for the SECOND SET of terms.")
+        term2 = term2 = input("Please input keywords for the SECOND SET of terms: ")
         term2 = list(term2.split(";"))
         print(
             "Please enter the filepath separated by '/'. The last entry will be the name of your .csv and .jpg files."
         )
         print("For example: /home/name/Downloads/filename")
-        save_path = input("Where would you like to save your results?")
+        save_path = input("Where would you like to save your results? ")
         if term1 and term2 and save_path != None:
             break
     # Results represents the list of lists appropriate for transfer to tabular form
-    results = []
+    pub_med = PubMed()
+    summary_results = []
+    notebook = []
     for keyword1 in term1:
         if keyword1.endswith("@"):
             keyword1 = keyword1.replace("@", "")
-            fill1 = (quote(keyword1)) + "%5BMeSH+Terms%5D%29"
+            fill1 = keyword1 + "[MeSH Terms]"
         else:
-            fill1 = quote(keyword1)
+            fill1 = keyword1
         for keyword2 in term2:
             if keyword2.endswith("@"):
                 keyword2 = keyword2.replace("@", "")
-                fill2 = (quote(keyword2)) + "%5BMeSH+Terms%5D%29"
+                fill2 = keyword2 + "[MeSH Terms]"
             else:
-                fill2 = quote(keyword2)
-            # Create URls by substituting keywords
-            URL = (
-                "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28"
-                + fill1
-                + "+AND+%28"
-                + fill2
-                + "&size=200"
-            )
+                fill2 = keyword2
+            # Create query term and URLs by substituting keywords
+            query_term = fill1 + " AND " + fill2
+            URL = "https://pubmed.ncbi.nlm.nih.gov/?term=" + quote(query_term)
             terms = (keyword1, "AND", keyword2)
-            print("Generating URLs for:", terms)
-            # Request the URL and parse the content
-            page = requests.get(URL)
-            view = bs(page.content, "html.parser")
-            # Search for the html code representing the # of papers found
-            result = view.find("span", {"class": "value"})
-            if result != None:
-                result = result.get_text(strip=True)
-                result = result.replace(",", "")
-                result = int(result)
-            if result == None:
-                result = 0
-                result = view.find("span", {"class": "single-result-redirect-message"})
-                # Exception for single result searches
-                if result != None:
-                    result = 1
-                if result == None:
-                    result = 0
-            results.append([URL, terms, result])
+            print("Searching for: ", terms)
+            # Get search result for terms
+            search_result = pub_med.query(query_term, max_results=10000)
+            print(search_result.url)
+            citation_count = search_result.count
+            summary_results.append([URL, terms, citation_count])
+            notebook.append(["PMID:" + id for id in search_result.id_list])
+            if citation_count > 0:
+                print(citation_count, "citations found.")
+            else:
+                print("No citations found.")
+
     # Transfer list of lists to tabular form
-    df = pd.DataFrame(results, columns=["URL", "Terms", "Number of Titles"])
+    df = pd.DataFrame(summary_results, columns=["URL", "Terms", "Number of Titles"])
     df.insert(loc=3, column="Cum Sum", value=df["Number of Titles"].cumsum())
     file_name = os.path.join(save_path + "_search_summary.csv")
     df.to_csv(file_name)
-    print("URLs generated...")
-    return save_path
 
-
-def get_citations(save_path):
-    """Extracts article IDs from URLs."""
-
-    # Get URLs
-    file_name = os.path.join(save_path + "_search_summary.csv")
-    df = pd.read_csv(file_name, index_col=0)
-    notebook = []
-    for link in df["URL"]:
-        articles = []
-        print("Retrieving citations from:", link)
-        page = requests.get(link)
-        view = bs(page.content, "html.parser")
-        result = view.find("span", {"class": "value"})
-        if result != None:
-            result = result.get_text(strip=True)
-            result = result.replace(",", "")
-            result = int(result)
-            print(result, "citations found.")
-            max_pages = math.ceil((result) / 200)
-            # Extract PMIDs from PUBMED
-            print("Retrieving...", max_pages, "pages.")
-            for page in range(1, max_pages + 1):
-                new_link = link + "&page=" + str(page)
-                page = requests.get(new_link)
-                view = bs(page.content, "html.parser")
-                print("Downloading:", new_link)
-                papers = view.find_all("span", {"class": "citation-part"})
-                for paper in papers:
-                    paper = paper.get_text(strip=True)
-                    if paper.startswith("PMID"):
-                        articles.append(paper)
-        if result == None:
-            print("No citations found.")
-        notebook.append(articles)
     # Append data to _citation_IDs.csv
     df_notebook = pd.DataFrame(notebook)
     df_notebook = df_notebook.transpose()
     notebook_name = os.path.join(save_path + "_citation_IDs.csv")
     df_notebook.to_csv(notebook_name)
+
     return save_path, df, notebook
 
 
@@ -203,7 +158,7 @@ def plot_search(save_path, df, df2):
     # Save data
     alldata.savefig(os.path.join(save_path + ".jpg"), dpi=300)
     print("Data has been saved as", save_path)
-    print("Thank you for using Qwik Search. Goodbye!")
+    print("Thank you for using PubMed Screen. Goodbye!")
     exit()
 
 
@@ -244,8 +199,7 @@ def percent_overlap():
 
 
 def option_1():
-    save_path = generate_links()
-    save_path, df, notebook = get_citations(save_path)
+    save_path, df, notebook = screen_keywords()
     save_path, df, df2 = count_duplicates(save_path, df, notebook)
     plot_search(save_path, df, df2)
 
