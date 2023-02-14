@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 from urllib.parse import quote
 
@@ -86,8 +87,11 @@ def screen_keywords(api_key):
             terms = (keyword1, "AND", keyword2)
             print("Searching for: ", terms)
             # Get search result for terms
-            search_result = pub_med.query(query_term, max_results=9999)
-            print(search_result.url)
+            try:
+                search_result = pub_med.query(query_term, max_results=9999)
+            except Exception as ex:
+                print(ex, file=sys.stderr)
+                sys.exit(1)
             citation_count = search_result.count
             summary_results.append([URL, terms, citation_count])
             notebook.append(["PMID:" + id for id in search_result.id_list])
@@ -96,17 +100,21 @@ def screen_keywords(api_key):
             else:
                 print("No citations found.")
 
-    # Transfer list of lists to tabular form
-    df = pd.DataFrame(summary_results, columns=["URL", "Terms", "Number of Titles"])
-    df.insert(loc=3, column="Cum Sum", value=df["Number of Titles"].cumsum())
-    file_name = Path(save_path + "_search_summary.csv")
-    df.to_csv(file_name)
+    try:
+        # Transfer list of lists to tabular form
+        df = pd.DataFrame(summary_results, columns=["URL", "Terms", "Number of Titles"])
+        df.insert(loc=3, column="Cum Sum", value=df["Number of Titles"].cumsum())
+        file_name = Path(save_path + "_search_summary.csv")
+        df.to_csv(file_name)
 
-    # Append data to _citation_IDs.csv
-    df_notebook = pd.DataFrame(notebook)
-    df_notebook = df_notebook.transpose()
-    notebook_name = Path(save_path + "_citation_IDs.csv")
-    df_notebook.to_csv(notebook_name)
+        # Append data to _citation_IDs.csv
+        df_notebook = pd.DataFrame(notebook)
+        df_notebook = df_notebook.transpose()
+        notebook_name = Path(save_path + "_citation_IDs.csv")
+        df_notebook.to_csv(notebook_name)
+    except Exception as ex:
+        print(ex, file=sys.stderr)
+        sys.exit(1)
 
     return save_path, df, notebook
 
@@ -174,16 +182,21 @@ def percent_overlap():
     search1_name = input("What is the file path for the first search? ")
     search2_name = input("What is the file path for the second search? ")
     # Extract data
-    search1 = []
-    df3 = pd.read_csv(Path(search1_name), index_col=0)
-    for d in df3.columns:
-        for PMID in df3[str(d)]:
-            search1.append(PMID)
-    search2 = []
-    df4 = pd.read_csv(Path(search2_name), index_col=0)
-    for d in df4.columns:
-        for PMID in df4[str(d)]:
-            search2.append(PMID)
+    try:
+        search1 = []
+        df3 = pd.read_csv(Path(search1_name), index_col=0)
+        for d in df3.columns:
+            for PMID in df3[str(d)]:
+                search1.append(PMID)
+        search2 = []
+        df4 = pd.read_csv(Path(search2_name), index_col=0)
+        for d in df4.columns:
+            for PMID in df4[str(d)]:
+                search2.append(PMID)
+    except Exception as ex:
+        print(ex, file=sys.stderr)
+        sys.exit(1)
+
     # Calculate % overlap
     setA = set(search1)
     setB = set(search2)
@@ -225,7 +238,6 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        import sys
         from importlib.metadata import version
 
         print(version("pubmed-screen"))
