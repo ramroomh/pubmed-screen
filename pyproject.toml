@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pubmed-screen"
-version = "1.0.0"
+version = "0.1.0"
 authors = [
     { name = "Rami Hamati", email = "rhamati95@gmail.com" }
 ]
@@ -31,7 +31,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black"]
+dev = [
+    "black",
+]
 
 [project.scripts]
 pmscreen = "pubmed_screen.main:main"
