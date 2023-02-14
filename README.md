@@ -19,15 +19,15 @@ $ source venv/bin/activate
 $ pip3 install --editable .[dev]
 ```
 
-3) Edit the `pmscreen/main.py` file to make changes.
+3) Edit the `src/pubmed_screen/main.py` file to make changes.
 
 4) Run the script with the `pmscreen` command that was installed by pip.
 
 ```
 $ pmscreen
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Welcome to Qwik Search 1.0.
+Welcome to PubMed Screen.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Qwik Search allows you to optimize your search strategy.
+PubMed Screen allows you to optimize your search strategy.
 Would you like to create a search (enter: 1) or compare searches (enter: 2)?
 ```
