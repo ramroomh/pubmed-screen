@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "pubmed-screen"
-version = "1.0.0"
+version = "0.1.0"
 authors = [
     { name = "Rami Hamati", email = "rhamati95@gmail.com" }
 ]
@@ -25,13 +25,15 @@ classifiers = [
 requires-python = ">=3.8"
 
 dependencies = [
-    "pandas >= 1.5.0, < 2",
-    "requests >= 2.28.0, < 3",
-    "seaborn >= 0.12.0, < 1",
+    "pandas>=1.5.0",
+    "requests>=2.28.0",
+    "seaborn>=0.12.0",
 ]
 
 [project.optional-dependencies]
-dev = ["black"]
+dev = [
+    "black",
+]
 
 [project.scripts]
-pmscreen = "pmscreen.main:main"
+pmscreen = "pubmed_screen.main:main"
