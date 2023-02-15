@@ -19,7 +19,7 @@ $ source venv/bin/activate
 $ pip3 install --editable .
 ```
 
-3) Edit the `pmscreen/main.py` file to make changes.
+3) Edit the `src/pubmed_screen/main.py` file to make changes.
 
 4) Run the script with the `pmscreen` command that was installed by pip.
 
