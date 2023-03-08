@@ -37,12 +37,32 @@ class PubMed:
             "term": term,
             "retmax": max_results,
             "retmode": "json",
+            "usehistory": "y",
         }
         if self.api_key:
             params["api_key"] = self.api_key
         response = requests.get(url, params)
         response.raise_for_status()
         return SearchResult(response)
+
+    def fetch_citations(self, search_result):
+        """Returns citations in PubMed text format from a previous search."""
+        # Enforce minimum intervals between calls
+        self.limiter.wait()
+
+        # Send search request
+        url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+        params = {
+            "db": "pubmed",
+            "query_key": search_result.query_key,
+            "WebEnv": search_result.webenv,
+            "rettype": "medline",
+        }
+        if self.api_key:
+            params["api_key"] = self.api_key
+        response = requests.get(url, params)
+        response.raise_for_status()
+        return response.text
 
 
 class SearchResult:
@@ -73,6 +93,16 @@ class SearchResult:
         """A canonical representation of the search term"""
         return self.search_result["querytranslation"]
 
+    @property
+    def query_key(self):
+        """The query key for the search history"""
+        return self.search_result["querykey"]
+
+    @property
+    def webenv(self):
+        """The WebEnv ID for the search history"""
+        return self.search_result["webenv"]
+
     def __repr__(self):
         return str(self.search_result)
 
@@ -99,3 +129,6 @@ if __name__ == "__main__":
     print(result.count)
     print(result.id_list)
     print(result.query_translation)
+
+    citations = pub_med.fetch_citations(result)
+    print(citations[:2000])
