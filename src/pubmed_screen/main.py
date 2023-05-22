@@ -1,5 +1,6 @@
 import argparse
 import sys
+import csv
 from pathlib import Path
 from urllib.parse import quote
 
@@ -69,6 +70,7 @@ def screen_keywords(api_key):
     pub_med = PubMed(api_key)
     summary_results = []
     notebook = []
+    searchcount = 0
     for keyword1 in term1:
         if keyword1.endswith("@"):
             keyword1 = keyword1.replace("@", "")
@@ -89,6 +91,11 @@ def screen_keywords(api_key):
             # Get search result for terms
             try:
                 search_result = pub_med.query(query_term, max_results=9999)
+                searchcount = searchcount +1
+                pmd_summary = pub_med.fetch_citations(search_result)
+                with open((Path(save_path + f"search{searchcount}.txt")), "w", encoding="utf-8", newline="") as file:
+                    writer = csv.writer(file)
+                    writer.writerow([pmd_summary[1:-1]])
             except Exception as ex:
                 print(ex, file=sys.stderr)
                 sys.exit(1)
